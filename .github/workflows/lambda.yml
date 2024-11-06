@@ -22,6 +22,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Save node_modules artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: node_modules
+          path: node_modules  
+
       - name: Set build path
         id: build
         run: echo "build-path=${GITHUB_WORKSPACE}" >> $GITHUB_OUTPUT
@@ -35,8 +41,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # - name: Copy build artifacts
-      #   run: cp -r ${{ needs.build.outputs.build-path }}/* ./
+      - name: Restore node_modules artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: node_modules  
 
       - name: Zip project files
         id: package
