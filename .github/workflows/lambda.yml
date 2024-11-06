@@ -9,23 +9,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Configurar node 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: Instalar dependências
         run: npm install
 
-      - name: Zip project files
+      - name: Realizar o zip do projeto
         id: package
         run: |
           zip -r lambda_function.zip . -x "*.git*"
 
-      - name: Save artifact
+      - name: Salvar artefato
         uses: actions/upload-artifact@v4
         with:
           name: lambda_function
@@ -35,23 +35,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: lambda_function
-          path: .  
-
-      - name: Configure AWS credentials
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
+      - name: Configurar credenciais da AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy to AWS Lambda
+      - name: Realizar download do artefato
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda_function
+          path: .  
+
+      - name: Realizar deploy da LAMBDA
         run: |
           aws lambda update-function-code \
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
