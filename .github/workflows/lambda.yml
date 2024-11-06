@@ -62,4 +62,4 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-            --zip-file fileb://${{ needs.package.outputs.zip-path }}
+            --zip-file fileb://${{ github.workspace }}/lambda_function.zip
