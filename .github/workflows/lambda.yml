@@ -62,10 +62,10 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Verify zip file path
-        run: ls -l ${{ needs.package.outputs.zip-path }}    
+        run: ls -l ${{ github.workspace }}/lambda_function.zip  
 
       - name: Deploy to AWS Lambda
         run: |
           aws lambda update-function-code \
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-            --zip-file fileb://${{ needs.package.outputs.zip-path }}
+            --zip-file fileb://${{ github.workspace }}/lambda_function.zip
