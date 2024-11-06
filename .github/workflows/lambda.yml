@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout código
+      - name: Checkout do código
         uses: actions/checkout@v4
 
       - name: Configurar node 20
@@ -35,8 +35,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v4
       - name: Configurar credenciais da AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
