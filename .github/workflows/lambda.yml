@@ -24,7 +24,7 @@ jobs:
 
       - name: Set build path
         id: build
-        run: echo "::set-output name=build-path::${{ github.workspace }}"
+        run: echo "build-path=${GITHUB_WORKSPACE}" >> $GITHUB_OUTPUT
 
   package:
     runs-on: ubuntu-latest
@@ -42,7 +42,10 @@ jobs:
         id: package
         run: |
           zip -r lambda_function.zip . -x "*.git*"
-          echo "::set-output name=zip-path::${{ github.workspace }}/lambda_function.zip"
+          echo "zip-path=${GITHUB_WORKSPACE}/lambda_function.zip" >> $GITHUB_OUTPUT
+
+      - name: Verify zip file creation
+        run: ls -l ${{ github.workspace }}/lambda_function.zip    
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,8 +61,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Verify zip file path
+        run: ls -l ${{ needs.package.outputs.zip-path }}    
+
       - name: Deploy to AWS Lambda
         run: |
           aws lambda update-function-code \
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-            --zip-file fileb://${{ github.workspace }}/lambda_function.zip
+            --zip-file fileb://${{ needs.package.outputs.zip-path }}
