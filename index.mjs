@@ -68,6 +68,8 @@ function encryptObject(object) {
 export const handler = async (event) => {
   console.log('*****************************')
   console.log(event)
+  path = event.get('path')
+  console.log(path)
   const token = event.authorizationToken;  // Supondo que o token JWT esteja no body do evento
 
   if (!token) {
