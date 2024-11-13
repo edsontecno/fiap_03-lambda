@@ -23,7 +23,7 @@ jobs:
       - name: Realizar o zip do projeto
         id: package
         run: |
-          zip -r lambda_function.zip . -x "*.git*"
+          zip -r lambda_function.zip . -x "*.git*" -x "terraform/*"
 
       - name: Salvar artefato
         uses: actions/upload-artifact@v4
