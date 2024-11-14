@@ -81,7 +81,11 @@ export const handler = async (event) => {
   try {
     let verifiedToken;
     if(event.methodArn.includes('auth/') && token.length < 128){
-      verifiedToken = await getUserData(token);
+      try {
+        verifiedToken = await getUserData(token);
+      } catch (error) {
+        console.log('Erro ao buscar usuário com token', error)
+      }
       console.log('>>>>>>>>>', verifiedToken)
     } else {
       verifiedToken = await verifyToken(token);
