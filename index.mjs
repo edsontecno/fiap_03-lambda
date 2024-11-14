@@ -89,6 +89,7 @@ export const handler = async (event) => {
       console.log('>>>>>>>>>', verifiedToken)
     } else {
       verifiedToken = await verifyToken(token);
+      console.log('XXXXXXXXXXx', verifiedToken)
     }
     const userCrypto = encryptObject(verifiedToken);
     console.log(userCrypto)
