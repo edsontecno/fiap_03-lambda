@@ -80,7 +80,7 @@ export const handler = async (event) => {
 
   try {
     let verifiedToken;
-    if(event.methodArn.includes('auth/')){
+    if(event.methodArn.includes('auth/') && token.length < 128){
       verifiedToken = await getUserData(token);
       console.log('>>>>>>>>>', verifiedToken)
     } else {
