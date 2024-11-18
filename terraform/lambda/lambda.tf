@@ -1,6 +1,6 @@
 # Criação da Lambda Function `authorization`
 resource "aws_lambda_function" "authorization" {
-  filename         = "../lambda_function.zip" 
+  filename         = "./lambda/lambda_function.zip" 
   function_name    = "authorization"
   role             = data.aws_iam_role.labrole.arn
   handler          = "authorization.lambda_handler"
@@ -8,14 +8,14 @@ resource "aws_lambda_function" "authorization" {
 
   environment {
     variables = {
-      REGION = "us-east-1"
+      REGION = var.region
       SECRET_KEY_CRYPTO = "SECRET_KEY"
-      USER_POOL_ID = "us-east-1_80QZtAqcL"
+      USER_POOL_ID = var.user_pool_id
     }
   }
 }
 
-# Exporta o ARN da função Lambda para uso em outros módulos
 output "lambda_function_arn" {
   value = aws_lambda_function.authorization.arn
 }
+
