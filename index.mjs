@@ -72,7 +72,7 @@ export const handler = async (event) => {
   const token = event.authorizationToken;
 
   try {
-    let verifiedToken;
+    let verifiedToken = {};
     if(event.methodArn.includes('public/')){
       try {
         if(token.length === 11){
@@ -98,7 +98,7 @@ export const handler = async (event) => {
     console.log(verifiedToken)
 
     const authResponse = {
-      principalId: verifiedToken.user_name,
+      principalId: verifiedToken?.user_name,
       policyDocument: {
           Version: '2012-10-17',
           Statement: [{
