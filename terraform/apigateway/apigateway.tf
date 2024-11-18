@@ -24,11 +24,18 @@ resource "aws_api_gateway_resource" "public" {
   path_part   = "public"
 }
 
-# Criação do recurso /public/{proxy+}
-resource "aws_api_gateway_resource" "public_proxy" {
+# Criação do recurso /public/orders
+resource "aws_api_gateway_resource" "public_orders" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   parent_id   = aws_api_gateway_resource.public.id
-  path_part   = "{proxy+}"
+  path_part   = "orders"
+}
+
+# Criação do recurso /public/payment
+resource "aws_api_gateway_resource" "public_payment" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_resource.public.id
+  path_part   = "payment"
 }
 
 resource "aws_api_gateway_authorizer" "lambda_authorizer" {
@@ -52,11 +59,10 @@ resource "aws_api_gateway_method" "auth_proxy_any" {
   }
 }
 
-# Método ANY para /public/{proxy+}
-resource "aws_api_gateway_method" "public_proxy_any" {
+resource "aws_api_gateway_method" "public_proxy_orders" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.public_proxy.id
-  http_method   = "ANY"
+  resource_id   = aws_api_gateway_resource.public_orders.id
+  http_method   = "POST"
   authorization = "CUSTOM" # Uso de autorizador customizado
   authorizer_id = aws_api_gateway_authorizer.lambda_authorizer.id
   request_parameters = {
@@ -64,6 +70,12 @@ resource "aws_api_gateway_method" "public_proxy_any" {
   }
 }
 
+resource "aws_api_gateway_method" "public_proxy_payment" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.public_payment.id
+  http_method   = "POST"
+  authorization = "NONE" 
+}
 
 resource "aws_api_gateway_integration" "auth_proxy_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
@@ -71,7 +83,7 @@ resource "aws_api_gateway_integration" "auth_proxy_integration" {
   http_method             = aws_api_gateway_method.auth_proxy_any.http_method
   integration_http_method = "ANY"
   type                    = "HTTP" 
-  uri                     = var.url_load_balance
+  uri                     = "${var.url_load_balance}/{proxy}"
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
     "integration.request.header.user" = "context.authorizer.user"
@@ -80,15 +92,24 @@ resource "aws_api_gateway_integration" "auth_proxy_integration" {
 
 resource "aws_api_gateway_integration" "public_proxy_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.public_proxy.id
-  http_method             = aws_api_gateway_method.public_proxy_any.http_method
-  integration_http_method = "ANY"
+  resource_id             = aws_api_gateway_resource.public_orders.id
+  http_method             = aws_api_gateway_method.public_proxy_orders.http_method
+  integration_http_method = "POST"
   type                    = "HTTP" 
-  uri                     = var.url_load_balance
+  uri                     = "${var.url_load_balance}/orders"
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
     "integration.request.header.user" = "context.authorizer.user"
   }
+}
+
+resource "aws_api_gateway_integration" "public_payment_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.public_payment.id
+  http_method             = aws_api_gateway_method.public_proxy_payment.http_method
+  integration_http_method = "POST"
+  type                    = "HTTP" 
+  uri                     = "${var.url_load_balance}/webhook"
 }
 
 resource "aws_api_gateway_deployment" "deployment" {

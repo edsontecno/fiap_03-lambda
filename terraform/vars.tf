@@ -11,7 +11,7 @@ variable "policyArn" {
 }
 
 variable "url_load_balance" {
-  default = "https://teste.com.br/{proxy}"
+  default = "https://teste.com.br"
 }
 
 variable "lambda_function_arn" {
