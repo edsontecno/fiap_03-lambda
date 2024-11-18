@@ -69,26 +69,27 @@ export const handler = async (event) => {
   console.log('*****************************')
   console.log(event)
   
-  const token = event.authorizationToken;  // Supondo que o token JWT esteja no body do evento
-
-  if (!token) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Token not provided' }),
-    };
-  }
+  const token = event.authorizationToken;
 
   try {
     let verifiedToken;
-    if(event.methodArn.includes('public/') && token.length < 128 && token.length > 10){
+    if(event.methodArn.includes('public/')){
       try {
-        verifiedToken = await getUserData(token);
+        if(token.length === 11){
+          verifiedToken = await getUserData(token);
+        }
       } catch (error) {
         console.log(error)
         throw new Error('Erro ao buscar por cpf >>> ', error.message)
       }
       console.log('>>>>>>>>>', verifiedToken)
     } else {
+      if (!token) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: 'Token not provided' }),
+        };
+      }
       verifiedToken = await verifyToken(token);
       console.log('XXXXXXXXXXx', verifiedToken)
     }
