@@ -80,8 +80,13 @@ export const handler = async (event) => {
 
   try {
     let verifiedToken;
-    if(event.methodArn.includes('auth/') && token.length < 128){
-      verifiedToken = await getUserData(token);
+    if(event.methodArn.includes('public/') && token.length < 128 && token.length > 10){
+      try {
+        verifiedToken = await getUserData(token);
+      } catch (error) {
+        console.log(error)
+        throw new Error('Erro ao buscar por cpf >>> ', error.message)
+      }
       console.log('>>>>>>>>>', verifiedToken)
     } else {
       verifiedToken = await verifyToken(token);
