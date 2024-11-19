@@ -6,6 +6,9 @@ resource "aws_lambda_function" "authorization" {
   handler          = "authorization.lambda_handler"
   runtime          = "nodejs20.x" 
 
+  source_code_hash = filebase64sha256("empty_function.js")
+  filename = "empty_function.js"
+
   environment {
     variables = {
       REGION = var.region
