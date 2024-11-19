@@ -55,7 +55,7 @@ jobs:
         run: terraform init    
 
       - name: Terraform Apply
-        working-directory: .
+        working-directory: ./terraform
         run: terraform apply -auto-approve
   deploy:
     runs-on: ubuntu-latest
