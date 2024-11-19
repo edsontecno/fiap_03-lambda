@@ -11,7 +11,7 @@ variable "policyArn" {
 }
 
 variable "url_load_balance" {
-  default = "https://teste.com.br"
+  default = "http://ab2bfee95334d40c8851de48748e20f6-853857609.us-east-1.elb.amazonaws.com:3000"
 }
 
 variable "lambda_function_arn" {
