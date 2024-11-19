@@ -1,6 +1,6 @@
 # Criação da Lambda Function `authorization`
 resource "aws_lambda_function" "authorization" {
-  filename         = "./lambda/lambda_function.zip" 
+  # filename         = "./lambda/lambda_function.zip" 
   function_name    = "authorization"
   role             = data.aws_iam_role.labrole.arn
   handler          = "authorization.lambda_handler"
