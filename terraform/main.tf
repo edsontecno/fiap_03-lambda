@@ -13,6 +13,8 @@ provider "aws" {
 # Cognito Module
 module "cognito" {
   source = "./cognito"
+  region       = var.regionDefault
+  url_load_balance    = var.url_load_balance
 }
 
 # Lambda Module
@@ -29,6 +31,7 @@ module "apigateway" {
   lambda_function_arn = module.lambda.lambda_function_arn
   url_load_balance    = var.url_load_balance
 }
+
 
 output "cognito_user_pool_id" {
   value = module.cognito.user_pool_id

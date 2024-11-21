@@ -36,9 +36,16 @@ resource "aws_cognito_user_pool" "user_pool" {
 resource "aws_cognito_user_pool_client" "user_pool_client" {
   name         = "usuarios_fiap_client"
   user_pool_id = aws_cognito_user_pool.user_pool.id
-
-  generate_secret = true
+  generate_secret = false
   explicit_auth_flows = ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_CUSTOM_AUTH"]
+
+  allowed_oauth_flows_user_pool_client = true # Habilita a interface hospedada
+  allowed_oauth_flows               = ["code", "implicit"] # Fluxos OAuth permitidos
+  allowed_oauth_scopes              = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
+
+  callback_urls = [
+    var.url_load_balance
+  ]
 }
 
 resource "aws_cognito_user" "example_user" {
@@ -52,6 +59,16 @@ resource "aws_cognito_user" "example_user" {
   force_alias_creation    = false
   message_action          = "SUPPRESS"
   desired_delivery_mediums = ["EMAIL"]
+}
+
+resource "aws_cognito_user_pool_domain" "example_user_pool_domain" {
+  domain      = "fiap-8soat-grupo22" # Substitua por um nome exclusivo
+  user_pool_id = aws_cognito_user_pool.user_pool.id
+}
+
+# Outputs para facilitar o uso
+output "login_url" {
+  value = "https://${aws_cognito_user_pool_domain.example_user_pool_domain.domain}.auth.${var.region}.amazoncognito.com/login?response_type=code&client_id=${aws_cognito_user_pool_client.user_pool_client.id}"
 }
 
 output "user_pool_id" {
