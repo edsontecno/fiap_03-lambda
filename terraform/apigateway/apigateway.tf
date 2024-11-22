@@ -38,6 +38,13 @@ resource "aws_api_gateway_resource" "public_payment" {
   path_part   = "payment"
 }
 
+# Criação do recurso /public/api-docs
+resource "aws_api_gateway_resource" "public_docs" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_resource.public.id
+  path_part   = "api-docs"
+}
+
 resource "aws_api_gateway_authorizer" "lambda_authorizer" {
   name                   = "authorization"
   rest_api_id            = aws_api_gateway_rest_api.api.id
@@ -77,6 +84,13 @@ resource "aws_api_gateway_method" "public_proxy_payment" {
   authorization = "NONE" 
 }
 
+resource "aws_api_gateway_method" "public_proxy_docs" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.public_docs.id
+  http_method   = "GET"
+  authorization = "NONE" 
+}
+
 resource "aws_api_gateway_integration" "auth_proxy_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.auth_proxy.id
@@ -88,9 +102,6 @@ resource "aws_api_gateway_integration" "auth_proxy_integration" {
     "integration.request.path.proxy" = "method.request.path.proxy"
     "integration.request.header.user" = "context.authorizer.user"
   }
-  # response_templates = {
-  #   "application/json" = "$input.json('$')"
-  # }
 }
 
 resource "aws_api_gateway_integration" "public_proxy_integration" {
@@ -104,9 +115,6 @@ resource "aws_api_gateway_integration" "public_proxy_integration" {
     "integration.request.path.proxy" = "method.request.path.proxy"
     "integration.request.header.user" = "context.authorizer.user"
   }
-  # response_templates = {
-  #   "application/json" = "$input.json('$')"
-  # }
 }
 
 resource "aws_api_gateway_integration" "public_payment_integration" {
@@ -116,45 +124,16 @@ resource "aws_api_gateway_integration" "public_payment_integration" {
   integration_http_method = "POST"
   type                    = "HTTP_PROXY" 
   uri                     = "${var.url_load_balance}/webhook"
-  # response_templates = {
-  #   "application/json" = "$input.json('$')"
-  # }
 }
 
-# resource "aws_api_gateway_integration_response" "public_order_response" {
-#   rest_api_id = aws_api_gateway_rest_api.api.id
-#   resource_id = aws_api_gateway_resource.public_orders.id
-#   http_method = aws_api_gateway_method.public_proxy_orders.http_method
-#   status_code = "200"
-
-#   response_parameters = {
-#     "method.response.header.Content-Type" = "'application/json'"
-#   }
-# }
-
-
-# resource "aws_api_gateway_integration_response" "public_payment_response" {
-#   rest_api_id = aws_api_gateway_rest_api.api.id
-#   resource_id = aws_api_gateway_resource.public_payment.id
-#   http_method = aws_api_gateway_method.public_proxy_payment.http_method
-#   status_code = "200"
-
-#   response_parameters = {
-#     "method.response.header.Content-Type" = "'application/json'"
-#   }
-# }
-
-# resource "aws_api_gateway_integration_response" "public_auth_response" {
-#   rest_api_id = aws_api_gateway_rest_api.api.id
-#   resource_id = aws_api_gateway_resource.auth_proxy.id
-#   http_method = aws_api_gateway_method.auth_proxy_any.http_method
-#   status_code = "200"
-
-#   response_parameters = {
-#     "method.response.header.Content-Type" = "'application/json'"
-#   }
-# }
-
+resource "aws_api_gateway_integration" "public_doc_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.public_docs.id
+  http_method             = aws_api_gateway_method.public_proxy_docs.http_method
+  integration_http_method = "GET"
+  type                    = "HTTP_PROXY" 
+  uri                     = "${var.url_load_balance}/api-docs"
+}
 
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
@@ -163,6 +142,8 @@ resource "aws_api_gateway_deployment" "deployment" {
   depends_on = [
     aws_api_gateway_integration.auth_proxy_integration,
     aws_api_gateway_integration.public_proxy_integration,
+    aws_api_gateway_integration.public_payment_integration,
+    aws_api_gateway_integration.public_doc_integration,
   ]
 }
 

@@ -39,13 +39,21 @@ resource "aws_cognito_user_pool_client" "user_pool_client" {
   generate_secret = false
   explicit_auth_flows = ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_CUSTOM_AUTH"]
 
-  allowed_oauth_flows_user_pool_client = true # Habilita a interface hospedada
-  allowed_oauth_flows               = ["code", "implicit"] # Fluxos OAuth permitidos
+  allowed_oauth_flows_user_pool_client = true 
+  allowed_oauth_flows               = ["code", "implicit"] 
   allowed_oauth_scopes              = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
 
   callback_urls = [
     var.url_load_balance
   ]
+  logout_urls = [
+    var.url_load_balance
+  ]
+}
+
+resource "aws_cognito_user_pool_domain" "user_pool_domain" {
+  domain      = "example-user-pool-domain" 
+  user_pool_id = aws_cognito_user_pool.user_pool.id
 }
 
 resource "aws_cognito_user" "example_user" {
@@ -54,21 +62,15 @@ resource "aws_cognito_user" "example_user" {
   attributes = {
     email        = "edsontecno@gmail.com"
     phone_number = "+55619812345667"
+    email_verified  = "true"
   }
-  temporary_password      = "12345678!"
+  lifecycle {
+    ignore_changes = [attributes["email_verified"]] # Evita erros em atualizações
+  }
+  password      = "12345678!"
   force_alias_creation    = false
   message_action          = "SUPPRESS"
   desired_delivery_mediums = ["EMAIL"]
-}
-
-resource "aws_cognito_user_pool_domain" "example_user_pool_domain" {
-  domain      = "fiap-8soat-grupo22" # Substitua por um nome exclusivo
-  user_pool_id = aws_cognito_user_pool.user_pool.id
-}
-
-# Outputs para facilitar o uso
-output "login_url" {
-  value = "https://${aws_cognito_user_pool_domain.example_user_pool_domain.domain}.auth.${var.region}.amazoncognito.com/login?response_type=code&client_id=${aws_cognito_user_pool_client.user_pool_client.id}"
 }
 
 output "user_pool_id" {
