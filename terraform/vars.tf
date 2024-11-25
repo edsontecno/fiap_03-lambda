@@ -11,7 +11,7 @@ variable "policyArn" {
 }
 
 variable "url_load_balance" {
-  default = "https://b03e-2804-46ec-80d-b900-9a0e-646a-cf41-19e3.ngrok-free.app"
+  default = "abbddfc7d770549abb778b312a76504d-35142584.us-east-1.elb.amazonaws.com:3000"
 }
 
 variable "lambda_function_arn" {
