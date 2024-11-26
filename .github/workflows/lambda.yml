@@ -3,7 +3,7 @@ name: Authorization
 on:
   push:
     branches:
-      - terraform_lambda
+      - main
 
 jobs:
   build:
