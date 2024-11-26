@@ -68,23 +68,37 @@ function encryptObject(object) {
 export const handler = async (event) => {
   console.log('*****************************')
   console.log(event)
-  const token = event.authorizationToken;  // Supondo que o token JWT esteja no body do evento
-
-  if (!token) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Token not provided' }),
-    };
-  }
+  
+  const token = event.authorizationToken;
 
   try {
-    const verifiedToken = await verifyToken(token);
+    let verifiedToken = {};
+    if(event.methodArn.includes('public/')){
+      try {
+        if(token.length === 11){
+          verifiedToken = await getUserData(token);
+        }
+      } catch (error) {
+        console.log(error)
+        throw new Error('Erro ao buscar por cpf >>> ', error.message)
+      }
+      console.log('>>>>>>>>>', verifiedToken)
+    } else {
+      if (!token) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: 'Token not provided' }),
+        };
+      }
+      verifiedToken = await verifyToken(token);
+      console.log('XXXXXXXXXXx', verifiedToken)
+    }
     const userCrypto = encryptObject(verifiedToken);
     console.log(userCrypto)
     console.log(verifiedToken)
 
     const authResponse = {
-      principalId: verifiedToken.user_name,
+      principalId: verifiedToken?.user_name,
       policyDocument: {
           Version: '2012-10-17',
           Statement: [{
