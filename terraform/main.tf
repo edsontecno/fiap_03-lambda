@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "fiap-fase03-tf"
+    bucket = "bucket-fiap-student"
     key    = "lambda/terraform.tfstate"
     region = "us-east-1"
   }
